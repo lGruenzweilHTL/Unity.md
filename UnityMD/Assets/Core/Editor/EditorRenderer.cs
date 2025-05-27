@@ -2,25 +2,52 @@ using UnityEngine;
 
 public class EditorRenderer : IMarkdownRenderer
 {
+    private void Label(string text, GUIStyle style)
+    {
+        GUILayout.Label(text, style, GUILayout.ExpandWidth(false));
+    }
     public void Header1(string text)
     {
-        GUILayout.Label(text, MarkdownStyles.Header1Style);
+        Label(text, MarkdownStyles.Header1Style);
     }
     public void Header2(string text)
     {
-        GUILayout.Label(text, MarkdownStyles.Header2Style);
+        Label(text, MarkdownStyles.Header2Style);
     }
     public void Header3(string text)
     {
-        GUILayout.Label(text, MarkdownStyles.Header3Style);
+        Label(text, MarkdownStyles.Header3Style);
     }
     public void Text(string text)
     {
-        GUILayout.Label(text, MarkdownStyles.NormalTextStyle);
+        Label(text, MarkdownStyles.NormalTextStyle);
     }
+
+    public void BoldText(string text)
+    {
+        Label(text, MarkdownStyles.BoldTextStyle);
+    }
+
+    public void ItalicText(string text)
+    {
+        Label(text, MarkdownStyles.ItalicTextStyle);
+    }
+
+    public void BoldAndItalicText(string text)
+    {
+        Label(text, MarkdownStyles.BoldAndItalicTextStyle);
+    }
+
+    public void MonospaceText(string text)
+    {
+        GUILayout.BeginHorizontal(MarkdownStyles.CodeBlockBodyStyle);
+        Label(text, MarkdownStyles.CodeBlockTextStyle);
+        GUILayout.EndHorizontal();
+    }
+
     public void Link(string text, string url)
     {
-        if (GUILayout.Button(text, MarkdownStyles.LinkStyle))
+        if (GUILayout.Button(text, MarkdownStyles.LinkStyle, GUILayout.ExpandWidth(false)))
         {
             Application.OpenURL(url);
         }
@@ -28,18 +55,18 @@ public class EditorRenderer : IMarkdownRenderer
     public void CodeBlock(string code)
     {
         GUILayout.BeginVertical(MarkdownStyles.CodeBlockBodyStyle);
-        GUILayout.Label(code, MarkdownStyles.CodeBlockTextStyle);
+        Label(code, MarkdownStyles.CodeBlockTextStyle);
         GUILayout.EndVertical();
     }
     public void Quote(string text)
     {
         GUILayout.BeginVertical(MarkdownStyles.QuoteBodyStyle);
-        GUILayout.Label(text, MarkdownStyles.QuoteTextStyle);
+        Label(text, MarkdownStyles.QuoteTextStyle);
         GUILayout.EndVertical();
     }
     public void HorizontalRule()
     {
-        GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
+        GUILayout.Box("", MarkdownStyles.HorizontalRuleStyle, GUILayout.ExpandWidth(true));
     }
     public void Space(float height = 10f)
     {
@@ -47,7 +74,18 @@ public class EditorRenderer : IMarkdownRenderer
     }
     public void ListItem(string text, int level)
     {
-        // TODO: bullets based on level
-        GUILayout.Label($"\u2022 {text}");
+        char[] bullets = {'\u2022', '\u25e6', '\u25ab'};
+        char bullet = bullets[Mathf.Clamp(level, 0, bullets.Length - 1)];
+        Label($"{bullet} {text}", MarkdownStyles.ListItemStyle);
+    }
+
+    public void BeginLine()
+    {
+        GUILayout.BeginHorizontal(GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
+    }
+
+    public void EndLine()
+    {
+        GUILayout.EndHorizontal();
     }
 }

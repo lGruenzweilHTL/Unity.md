@@ -6,7 +6,9 @@ public static class MarkdownStyles
     {
         richText = true,
         wordWrap = true,
-        fontSize = 14
+        fontSize = 14,
+        margin = new RectOffset(0, 0, 0, 0),
+        padding = new RectOffset(0, 0, 0, 0),
     };
     
     public static GUIStyle Header1Style => new(RtfLabel)
@@ -29,6 +31,21 @@ public static class MarkdownStyles
     {
         fontSize = 14,
         fontStyle = FontStyle.Normal,
+    };
+
+    public static GUIStyle BoldTextStyle => new(NormalTextStyle)
+    {
+        fontStyle = FontStyle.Bold
+    };
+
+    public static GUIStyle ItalicTextStyle => new(NormalTextStyle)
+    {
+        fontStyle = FontStyle.Italic
+    };
+
+    public static GUIStyle BoldAndItalicTextStyle => new(NormalTextStyle)
+    {
+        fontStyle = FontStyle.BoldAndItalic
     };
     public static GUIStyle LinkStyle => new(RtfLabel)
     {
@@ -62,13 +79,18 @@ public static class MarkdownStyles
         margin = new RectOffset(0, 0, 10, 10),
         border = new RectOffset(1, 1, 1, 1),
     };
-    public static GUIStyle ListItemStyle => new(RtfLabel)
+    public static GUIStyle ListItemStyle => new(NormalTextStyle)
     {
-        fontSize = 14,
-        fontStyle = FontStyle.Normal,
         padding = new RectOffset(10, 10, 5, 5),
         margin = new RectOffset(0, 0, 5, 5),
     };
-    
+
+    public static GUIStyle HorizontalRuleStyle = new(GUI.skin.box)
+    {
+        fixedHeight = 5,
+        margin = new RectOffset(0, 0, 10, 10),
+        normal = { background = Texture2D.whiteTexture },
+    };
+
     // TODO: tables
 }
