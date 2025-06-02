@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EditorRenderer : IMarkdownRenderer
 {
-    private void Label(string text, GUIStyle style)
+    private static void Label(string text, GUIStyle style)
     {
         GUILayout.Label(text, style, GUILayout.ExpandWidth(false));
     }
@@ -38,9 +38,14 @@ public class EditorRenderer : IMarkdownRenderer
         Label(text, MarkdownStyles.BoldAndItalicTextStyle);
     }
 
+    public void StrikethroughText(string text)
+    {
+        Label(text, MarkdownStyles.StrikethroughTextStyle);
+    }
+
     public void MonospaceText(string text)
     {
-        GUILayout.BeginHorizontal(MarkdownStyles.CodeBlockBodyStyle);
+        GUILayout.BeginHorizontal(MarkdownStyles.MonospaceBodyStyle);
         Label(text, MarkdownStyles.CodeBlockTextStyle);
         GUILayout.EndHorizontal();
     }
@@ -52,10 +57,13 @@ public class EditorRenderer : IMarkdownRenderer
             Application.OpenURL(url);
         }
     }
-    public void CodeBlock(string code)
+    public void CodeBlock(string[] lines)
     {
         GUILayout.BeginVertical(MarkdownStyles.CodeBlockBodyStyle);
-        Label(code, MarkdownStyles.CodeBlockTextStyle);
+        foreach (var line in lines)
+        {
+            Label(line, MarkdownStyles.CodeBlockTextStyle);
+        }
         GUILayout.EndVertical();
     }
     public void Quote(string text)

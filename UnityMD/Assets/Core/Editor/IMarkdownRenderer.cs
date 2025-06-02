@@ -9,9 +9,10 @@ public interface IMarkdownRenderer
     void BoldText(string text);
     void ItalicText(string text);
     void BoldAndItalicText(string text);
+    void StrikethroughText(string text);
     void MonospaceText(string text);
     void Link(string text, string url);
-    void CodeBlock(string code);
+    void CodeBlock(string[] lines);
     void Quote(string text);
     void HorizontalRule();
     void Space(float height = 10f);

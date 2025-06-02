@@ -1,9 +1,10 @@
 using System;
-using System.Linq;
 
 public class MarkdownParser
 {
     private readonly IMarkdownRenderer _renderer;
+    
+    private bool _openBold, _openItalic;
 
     public MarkdownParser(IMarkdownRenderer renderer)
     {
@@ -36,12 +37,9 @@ public class MarkdownParser
         {
             _renderer.HorizontalRule();
         }
-        else if (line.StartsWith("-") && line.Length >= 2)
-        {
-            _renderer.ListItem(line[1..], 0);
-        }
         else
         {
+            if (line.StartsWith('-')) line = " \u2022 " + line[1..];
             RenderText(line);
         }
     }
@@ -49,89 +47,92 @@ public class MarkdownParser
     private void RenderText(string text)
     {
         _renderer.BeginLine();
-        int currentIndex = 0;
+        string textToRender = "";
 
-        while (currentIndex < text.Length)
+        for (var i = 0; i < text.Length; i++)
         {
-            if (text[currentIndex] == '*' && currentIndex + 1 < text.Length && text[currentIndex + 1] == '*')
+            // Strikethrough text
+            if (text[i] == '~')
             {
-                // Bold text
-                int endIndex = text.IndexOf("**", currentIndex + 2, StringComparison.Ordinal);
+                _renderer.Text(textToRender);
+                textToRender = "";
+                int endIndex = text.IndexOf("~", i + 1, StringComparison.Ordinal);
                 if (endIndex != -1)
                 {
-                    _renderer.BoldText(text[(currentIndex + 2)..endIndex]);
-                    currentIndex = endIndex + 2;
-                    continue;
+                    _renderer.StrikethroughText(text.Substring(i + 1, endIndex - i - 1));
+                    i = endIndex; // Move past the closing '~'
+                }
+                else
+                {
+                    textToRender += text[i]; // If no closing '~', treat as normal text
                 }
             }
-            else if (text[currentIndex] == '*')
+            // Bold text
+            else if (text[i] == '*' && i + 1 < text.Length && text[i + 1] == '*')
             {
-                // Italic text
-                int endIndex = text.IndexOf('*', currentIndex + 1);
+                _openBold = !_openBold;
+                textToRender += _openBold ? "<b>" : "</b>";
+                i++; // Skip the next '*'
+            }
+            // Italic text
+            else if (text[i] == '*')
+            {
+                _openItalic = !_openItalic;
+                textToRender += _openItalic ? "<i>" : "</i>";
+            }
+            // Links
+            else if (text[i] == '[')
+            {
+                _renderer.Text(textToRender);
+                textToRender = "";
+                if (!RenderLink(ref i, text)) textToRender += text[i];
+            }
+            // Monospace text
+            else if (text[i] == '`')
+            {
+                _renderer.Text(textToRender);
+                textToRender = "";
+                int endIndex = text.IndexOf('`', i + 1);
                 if (endIndex != -1)
                 {
-                    _renderer.ItalicText(text[(currentIndex + 1)..endIndex]);
-                    currentIndex = endIndex + 1;
-                    continue;
+                    _renderer.MonospaceText(text.Substring(i + 1, endIndex - i - 1));
+                    i = endIndex; // Move past the closing backtick
+                }
+                else
+                {
+                    textToRender += text[i]; // If no closing backtick, treat as normal text
                 }
             }
-            else if (text[currentIndex] == '[')
-            {
-                RenderLink(ref currentIndex, text);
-                continue;
-            }
-
-            // Handle unmatched or plain `*`
-            if (text[currentIndex] == '*')
-            {
-                _renderer.Text("*");
-                currentIndex++;
-                continue;
-            }
-
-            // Render normal text
-            int nextSpecialChar = text.IndexOfAny(new[] { '*', '[', ']' }, currentIndex);
-            if (nextSpecialChar == -1)
-            {
-                _renderer.Text(text[currentIndex..]);
-                break;
-            }
+            // Normal text
             else
             {
-                _renderer.Text(text[currentIndex..nextSpecialChar]);
-                currentIndex = nextSpecialChar;
+                textToRender += text[i];
             }
         }
-
+        
+        // TODO: monospace text, code blocks, quotes
+        if (!string.IsNullOrWhiteSpace(textToRender))
+            _renderer.Text(textToRender);
+        
         _renderer.EndLine();
     }
-
-    private void RenderLink(ref int currentIndex, string text)
+    
+    private bool RenderLink(ref int currentIndex, string text)
     {
-        // [test]
-        int closingBracketIndex = text.IndexOf(']', currentIndex);
-        if (closingBracketIndex != -1 && closingBracketIndex + 1 < text.Length &&
-            text[closingBracketIndex + 1] == '(')
-        {
-            int closingParenthesisIndex = text.IndexOf(')', closingBracketIndex + 2);
-            if (closingParenthesisIndex != -1)
-            {
-                string linkText = text[(currentIndex + 1)..closingBracketIndex];
-                string linkUrl = text[(closingBracketIndex + 2)..closingParenthesisIndex];
-                _renderer.Link(linkText, linkUrl);
-                currentIndex = closingParenthesisIndex + 1;
-            }
-            else
-            {
-                // Handle incomplete link (missing closing parenthesis)
-                _renderer.Text(text[currentIndex..(closingBracketIndex + 1)]);
-                currentIndex = closingBracketIndex + 1;
-            }
-        }
-        // Handle incomplete link (missing closing bracket)
-        else
-        {
-            currentIndex = text.Length;
-        }
+        int endIndex = text.IndexOf(')', currentIndex);
+        if (endIndex == -1) return false;
+
+        string linkText = text.Substring(currentIndex, endIndex - currentIndex);
+        int urlStart = linkText.IndexOf('[');
+        int urlEnd = linkText.IndexOf(']');
+
+        if (urlStart == -1 || urlEnd == -1 || urlEnd <= urlStart) return false;
+
+        string displayText = linkText.Substring(urlStart + 1, urlEnd - urlStart - 1);
+        string url = linkText[(urlEnd + 2)..].Trim();
+
+        _renderer.Link(displayText, url);
+        currentIndex = endIndex; // Move past the closing parenthesis
+        return true;
     }
 }

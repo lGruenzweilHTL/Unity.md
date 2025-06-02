@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 public static class MarkdownStyles
@@ -32,7 +33,11 @@ public static class MarkdownStyles
         fontSize = 14,
         fontStyle = FontStyle.Normal,
     };
-
+    
+    public static GUIStyle StrikethroughTextStyle => new(NormalTextStyle)
+    {
+        normal = { background = CreateSineWaveTexture() }
+    };
     public static GUIStyle BoldTextStyle => new(NormalTextStyle)
     {
         fontStyle = FontStyle.Bold
@@ -58,6 +63,7 @@ public static class MarkdownStyles
         padding = new RectOffset(10, 10, 10, 10),
         margin = new RectOffset(0, 0, 10, 10),
     };
+    public static GUIStyle MonospaceBodyStyle => new(GUI.skin.box) { };
     public static GUIStyle CodeBlockTextStyle => new(RtfLabel)
     {
         fontSize = 14,
@@ -85,7 +91,7 @@ public static class MarkdownStyles
         margin = new RectOffset(0, 0, 5, 5),
     };
 
-    public static GUIStyle HorizontalRuleStyle = new(GUI.skin.box)
+    public static GUIStyle HorizontalRuleStyle => new(GUI.skin.box)
     {
         fixedHeight = 5,
         margin = new RectOffset(0, 0, 10, 10),
@@ -93,4 +99,35 @@ public static class MarkdownStyles
     };
 
     // TODO: tables
+    
+    private static Texture2D CreateStrikethroughTexture()
+    {
+        var texture = new Texture2D(5, 5);
+        texture.SetPixels(
+            Enumerable.Repeat(Color.clear, 10)
+                .Concat(Enumerable.Repeat(Color.white, 5))
+                .Concat(Enumerable.Repeat(Color.clear, 10))
+                .ToArray());
+        texture.Apply(); // Apply changes to the texture
+        return texture;
+    }
+
+    private static Texture2D CreateSineWaveTexture()
+    {
+        var texture = new Texture2D(16384, 16384);
+        for (int x = 0; x < texture.width; x++)
+        {
+            for (int y = 0; y < texture.height; y++)
+            {
+                // Calculate sine wave value
+                float sineValue = Mathf.Sin(8 * Mathf.PI * x / texture.width);
+                int waveHeight = Mathf.RoundToInt((sineValue + 1) / 2 * (texture.height - 1)); // Map to texture height
+
+                // Set pixel color
+                texture.SetPixel(x, y, Mathf.Abs(y - waveHeight) <= 50 ? Color.white : Color.clear);
+            }
+        }
+        texture.Apply();
+        return texture;
+    }
 }
