@@ -36,7 +36,7 @@ public static class MarkdownStyles
     
     public static GUIStyle StrikethroughTextStyle => new(NormalTextStyle)
     {
-        normal = { background = CreateSineWaveTexture() }
+        normal = { background = CreateStrikethroughTexture() }
     };
     public static GUIStyle BoldTextStyle => new(NormalTextStyle)
     {
@@ -63,11 +63,14 @@ public static class MarkdownStyles
         padding = new RectOffset(10, 10, 10, 10),
         margin = new RectOffset(0, 0, 10, 10),
     };
-    public static GUIStyle MonospaceBodyStyle => new(GUI.skin.box) { };
+    public static GUIStyle MonospaceBodyStyle => new(GUI.skin.box)
+    {
+        padding = new RectOffset(0, 0, 0, 0),
+        margin = new RectOffset(0, 0, 0, 0),
+    };
     public static GUIStyle CodeBlockTextStyle => new(RtfLabel)
     {
         fontSize = 14,
-        fontStyle = FontStyle.Italic,
         normal = { textColor = Color.gray }
     };
     
@@ -109,25 +112,6 @@ public static class MarkdownStyles
                 .Concat(Enumerable.Repeat(Color.clear, 10))
                 .ToArray());
         texture.Apply(); // Apply changes to the texture
-        return texture;
-    }
-
-    private static Texture2D CreateSineWaveTexture()
-    {
-        var texture = new Texture2D(16384, 16384);
-        for (int x = 0; x < texture.width; x++)
-        {
-            for (int y = 0; y < texture.height; y++)
-            {
-                // Calculate sine wave value
-                float sineValue = Mathf.Sin(8 * Mathf.PI * x / texture.width);
-                int waveHeight = Mathf.RoundToInt((sineValue + 1) / 2 * (texture.height - 1)); // Map to texture height
-
-                // Set pixel color
-                texture.SetPixel(x, y, Mathf.Abs(y - waveHeight) <= 50 ? Color.white : Color.clear);
-            }
-        }
-        texture.Apply();
         return texture;
     }
 }

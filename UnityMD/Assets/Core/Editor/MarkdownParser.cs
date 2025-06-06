@@ -110,7 +110,7 @@ public class MarkdownParser
             }
         }
         
-        // TODO: monospace text, code blocks, quotes
+        // TODO: code blocks, quotes, underlines, tables, checkbox lists, info boxes, images
         if (!string.IsNullOrWhiteSpace(textToRender))
             _renderer.Text(textToRender);
         
