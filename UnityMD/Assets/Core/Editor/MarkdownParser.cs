@@ -40,6 +40,8 @@ public class MarkdownParser
         else
         {
             if (line.StartsWith('-')) line = " \u2022 " + line[1..];
+            else if (line.StartsWith("\t-")) line = "    \u25e6 " + line[2..];
+            else if (line.StartsWith("\t\t-")) line = "       \u25ab " + line[3..];
             RenderText(line);
         }
     }
