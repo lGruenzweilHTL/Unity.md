@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 public class MarkdownParser
 {
@@ -13,9 +14,38 @@ public class MarkdownParser
 
     public void RenderMarkdownText(string[] lines)
     {
+        bool inCodeBlock = false;
+        List<string> currentCodeBlock = new();
         foreach (var line in lines)
         {
+            if (line == "```" && inCodeBlock)
+            {
+                // End of code block
+                inCodeBlock = false;
+                _renderer.CodeBlock(currentCodeBlock.ToArray());
+                currentCodeBlock.Clear();
+                continue;
+            }
+            else if (line.StartsWith("```"))
+            {
+                // Start of code block
+                inCodeBlock = true;
+                continue;
+            }
+            if (inCodeBlock)
+            {
+                currentCodeBlock.Add(line);
+                continue;
+            }
+
             RenderLine(line);
+        }
+        
+        // Clean up any remaining code block lines
+        if (currentCodeBlock.Count > 0)
+        {
+            _renderer.CodeBlock(currentCodeBlock.ToArray());
+            currentCodeBlock.Clear();
         }
     }
 
@@ -36,6 +66,10 @@ public class MarkdownParser
         else if (line.StartsWith("---"))
         {
             _renderer.HorizontalRule();
+        }
+        else if (string.IsNullOrWhiteSpace(line))
+        {
+            _renderer.Space();
         }
         else
         {
