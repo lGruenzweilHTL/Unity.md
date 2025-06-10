@@ -76,18 +76,12 @@ public static class MarkdownStyles
     
     public static GUIStyle QuoteBodyStyle => new(GUI.skin.box)
     {
-        padding = new RectOffset(10, 10, 10, 10),
-        margin = new RectOffset(0, 0, 10, 10),
+        padding = new RectOffset(0, 0, 0, 0),
+        margin = new RectOffset(0, 3, 0, 0),
+        normal = { background = Texture2D.whiteTexture },
     };
-    public static GUIStyle QuoteTextStyle => new(RtfLabel)
-    {
-        fontSize = 14,
-        fontStyle = FontStyle.Italic,
-        normal = { textColor = Color.gray },
-        padding = new RectOffset(10, 10, 10, 10),
-        margin = new RectOffset(0, 0, 10, 10),
-        border = new RectOffset(1, 1, 1, 1),
-    };
+
+    public static GUIStyle QuoteTextStyle => new(NormalTextStyle);
     public static GUIStyle ListItemStyle => new(NormalTextStyle)
     {
         padding = new RectOffset(10, 10, 5, 5),

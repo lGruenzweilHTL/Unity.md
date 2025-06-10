@@ -68,9 +68,10 @@ public class EditorRenderer : IMarkdownRenderer
     }
     public void Quote(string text)
     {
-        GUILayout.BeginVertical(MarkdownStyles.QuoteBodyStyle);
-        Label(text, MarkdownStyles.QuoteTextStyle);
-        GUILayout.EndVertical();
+        GUILayout.BeginHorizontal();
+        Label(" ", MarkdownStyles.QuoteBodyStyle);
+        Label(" " + text, MarkdownStyles.QuoteTextStyle);
+        GUILayout.EndHorizontal();
     }
     public void HorizontalRule()
     {

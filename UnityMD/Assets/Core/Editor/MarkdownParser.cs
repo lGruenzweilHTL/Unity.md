@@ -71,6 +71,10 @@ public class MarkdownParser
         {
             _renderer.Space();
         }
+        else if (line.StartsWith(">"))
+        {
+            _renderer.Quote(line[1..].Trim());
+        }
         else
         {
             // Unordered lists
