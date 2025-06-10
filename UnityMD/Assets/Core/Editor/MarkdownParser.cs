@@ -39,11 +39,27 @@ public class MarkdownParser
         }
         else
         {
+            // Unordered lists
             if (line.StartsWith('-')) line = " \u2022 " + line[1..];
             else if (line.StartsWith("\t-")) line = "    \u25e6 " + line[2..];
             else if (line.StartsWith("\t\t-")) line = "       \u25ab " + line[3..];
+            
+            // Ordered lists
+            line = HandleOrderedLists(line);
             RenderText(line);
         }
+    }
+
+    private static string HandleOrderedLists(string line)
+    {
+        int numTabs = 0;
+        while (numTabs < line.Length && line[numTabs] == '\t') numTabs++;
+        if (numTabs >= 0 && line.Length > numTabs + 2 && char.IsDigit(line[numTabs]) && line[numTabs + 1] == '.')
+        {
+            return $"{new string(' ', (numTabs * 3) + 1)}{line[numTabs]}. {line[(numTabs + 2)..]}";
+        }
+
+        return line;
     }
 
     private void RenderText(string text)
